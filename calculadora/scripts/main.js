@@ -10,6 +10,12 @@ let digits_integer = 0;
 let digits_decimal = 0; 
 
 let operator = '';
+let equal = 0;
+/*
+    0: Last action wasn't equal key
+    1: Last action was equal key
+*/
+
 let action = 0; 
 /*
     0: Writing FIRST NUMBER
@@ -30,11 +36,31 @@ let sign = 1;
 
 function setScreen(pNumber) {
     let oScreen = document.querySelector('.screen');
-    let nContent = new Number(pNumber);
+    let nContent = new Number(roundTo(pNumber));
     oScreen.innerHTML = `<input id = "txtScreen" class = "txtScreen" type = "text" placeholder = ${nContent.toString()} readonly = "true">`;
 }
 
+function roundTo(pNumber) {
+    return pNumber.toFixed(max_digits_decimal);
+}
+
 function onNumber(pDigit) {
+    if (equal == 1) {
+        integer_previous = 0;
+        integer_current = 0;
+        decimal_previous = 0.0;
+        decimal_current = 0.0;
+        
+        digits_integer = 0;
+        digits_decimal = 0; 
+        
+        operator = '';
+        action = 0; 
+        dot = 0;
+        sign = 1;
+        equal = 0;
+    }
+
     if (dot == 0) {
         if (digits_integer < max_digits_integer) {
             integer_current = integer_current * 10 + pDigit * sign;
@@ -60,9 +86,24 @@ function onOperator(pOperator) {
         action = 1;         
         dot = 0;
         sign = 1;
+        equal = 0;
     } 
-    else 
-        ComputeResult();
+    else {
+        if (equal == 1) {
+            integer_previous = integer_current;
+            decimal_previous = decimal_current;
+            integer_current = 0;
+            decimal_current = 0.0;
+            digits_integer = 0;
+            digits_decimal = 0;
+            action = 1;         
+            dot = 0;
+            sign = 1;
+            equal = 0;
+        } 
+        else
+            ComputeResult();
+    }
 
     operator = pOperator;
 };
@@ -82,6 +123,7 @@ function onAction(pAction) {
             action = 0; 
             dot = 0;
             sign = 1;
+            equal = 0;
 
             setScreen(0);
 
@@ -96,13 +138,16 @@ function onAction(pAction) {
             operator = '';
             dot = 0;
             sign = 1;
+            equal = 0;
             
             setScreen(0);
 
             break;
         case '=':
-            if (action == 1) 
+            if (action == 1) {
                 ComputeResult();
+                equal = 1;
+            }
             break;
     };
 };
